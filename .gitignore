@@ -1,0 +1,17 @@
+out
+
+# python
+__pycache__
+
+# VS Code
+.vscode/
+
+# Sublime
+*.sublime-*
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
