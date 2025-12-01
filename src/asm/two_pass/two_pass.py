@@ -1,19 +1,12 @@
-from asm.parser import Parser, SymbolTable
-from asm.generator import CodeGenerator, ReferenceTable
+from .parser import Parser
+from .generator import CodeGenerator
 
-class Result:
-	def __init__(self, 
-			symbolTable: SymbolTable, 
-			referenceTable: ReferenceTable, 
-			machineCode: str):
+from asm.common import *
 
-		self.symbolTable = symbolTable
-		self.referenceTable = referenceTable
-		self.machineCode = machineCode
-
-class Asm:
+class TwoPassAssembler(AssemblerI):
 
 	def __init__(self):
+		super().__init__("2 pasadas")
 		self.parser = Parser()
 		self.codeGenerator = CodeGenerator()
 

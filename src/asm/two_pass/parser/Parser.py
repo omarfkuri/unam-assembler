@@ -1,38 +1,7 @@
 from typing import cast
-from asm.parser.Instruction import *
 
-class SymbolTable:
-	def __init__(self):
-		self.symbols: dict[str, int] = {}
-	
-	def add_symbol(self, name: str, address: int):
-		self.symbols[name] = address
-	
-	def get_address(self, name: str) -> int | None:
-		return self.symbols.get(name)
-	
-	def has_symbol(self, name: str) -> bool:
-		return name in self.symbols
-	
-	def __str__(self):
-		if not self.symbols:
-			return "--"
-		
-		lines = ["Tabla de símbolos:"]
-		lines.append("-" * 40)
-		lines.append(f"{'Símbolo':<20} {'Dirección':>10}")
-		lines.append("-" * 40)
-		
-		for name, address in sorted(self.symbols.items()):
-			lines.append(f"{name:<20} 0x{address:08X}")
-		
-		lines.append("-" * 40)
-		lines.append(f"Total: {len(self.symbols)} símbolos")
-		
-		return "\n".join(lines)
-	
-	def __repr__(self):
-		return f"SymbolTable({len(self.symbols)} symbols)"
+from asm.common import *
+from .Instruction import *
 
 class ParseResult:
 	def __init__(self, instructions: list[Instruction], symbol_table: SymbolTable):
@@ -42,13 +11,14 @@ class ParseResult:
 class Parser:
 	def __init__(self):
 		self.symbol_table: SymbolTable
-		self.data_address = 0x0000
-		self.text_address = 0x1000
-		self.in_data_section = False
+		self.tracker: Tracker
 	
 	def readInstructions(self, filename: str) -> ParseResult:
-		instructions: list[Instruction] = []
 		self.symbol_table = SymbolTable()
+		self.tracker = Tracker()
+		
+		instructions: list[Instruction] = []
+
 		with open(filename, "r") as file:
 			for line in file.read().splitlines():
 				code = line.strip()
@@ -61,7 +31,7 @@ class Parser:
 				tokens = code.split()
 				
 				if tokens[0].lower() == 'section':
-					self.in_data_section = '.data' in code.lower()
+					self.tracker.in_data_section = '.data' in code.lower()
 					continue
 				
 				if tokens[0].lower() == 'global':
@@ -69,7 +39,7 @@ class Parser:
 				
 				if code.endswith(':'):
 					label_name = code[:-1]
-					address = self.data_address if self.in_data_section else self.text_address
+					address = self.tracker.data_address if self.tracker.in_data_section else self.tracker.text_address
 					self.symbol_table.add_symbol(label_name, address)
 					continue
 				
@@ -78,10 +48,10 @@ class Parser:
 					directive = tokens[1].lower()
 					value = ' '.join(tokens[2:]) if len(tokens) > 2 else ""
 					
-					self.symbol_table.add_symbol(label, self.data_address)
+					self.symbol_table.add_symbol(label, self.tracker.data_address)
 					
 					size = {'db': 1, 'dw': 2, 'dd': 4}.get(directive, 4)
-					self.data_address += size
+					self.tracker.data_address += size
 					
 					instructions.append(DataDeclarationInstruction(label, directive, value))
 					continue
@@ -89,30 +59,37 @@ class Parser:
 				inst = self._parseInstruction(code)
 				instructions.append(inst)
 				
-				if not self.in_data_section:
-					self.text_address += self._estimate_instruction_size(inst)
+				if not self.tracker.in_data_section:
+					self.tracker.text_address += self._estimateInstSize(inst)
 		
 		return ParseResult(instructions, self.symbol_table)
 	
-	def _estimate_instruction_size(self, inst: Instruction) -> int:
-		if isinstance(inst, (RetInstruction, NopInstruction)):
-			return 1
-		elif isinstance(inst, (JmpInstruction, JeInstruction, JneInstruction, 
-		                       JleInstruction, JlInstruction, JzInstruction, 
-		                       JnzInstruction, JaInstruction, JaeInstruction,
-		                       JbInstruction, JbeInstruction, JgInstruction, 
-		                       JgeInstruction, LoopInstruction)):
-			return 2
-		elif isinstance(inst, (IncInstruction, DecInstruction)):
-			return 1
-		elif isinstance(inst, (PushInstruction, PopInstruction)):
-			return 1
-		elif isinstance(inst, IntInstruction):
-			return 2
-		elif isinstance(inst, MoveInstruction):
-			return 5
-		else:
-			return 3
+	def _estimateInstSize(self, inst: Instruction) -> int:
+		match inst:
+			case RetInstruction() | NopInstruction():
+				return 1
+
+			case (JmpInstruction() | JeInstruction()  | JneInstruction() | 
+		        JleInstruction() | JlInstruction()  | JzInstruction()  | 
+		        JnzInstruction() | JaInstruction()  | JaeInstruction() |
+		        JbInstruction()  | JbeInstruction() | JgInstruction()  | 
+		        JgeInstruction() | LoopInstruction()):
+				return 2
+
+			case IncInstruction() | DecInstruction():
+				return 1
+
+			case PushInstruction() | PopInstruction():
+				return 1
+
+			case IntInstruction():
+				return 2
+
+			case MoveInstruction():
+				return 5
+
+			case _:
+				return 3
 	
 	def _parseInstruction(self, code: str) -> Instruction:
 		tokens = code.split()

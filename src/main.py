@@ -1,45 +1,25 @@
-from time import perf_counter
 from os import makedirs
 
-from asm import Asm
+from asm import *
+
+NAME = "fib"
+IN_DIR = "files"
+OUT_DIR_1 = "out/one_pass"
+OUT_DIR_2 = "out/two_pass"
+
+# Se busca un archivo llamado "{IN_DIR}/{NAME}.asm"
+# y se produce a "{OUT_DIR_1}" el código de 1
+# pasada, y a "{OUT_DIR_2}" el código de 2 pasadas.
 
 def main():
+	makedirs(OUT_DIR_1, exist_ok=True)
+	makedirs(OUT_DIR_2, exist_ok=True)
 
-	IN_DIR = "files"
-	OUT_DIR = "out"
-	NAME = "fib"
+	asm = OnePassAssembler()
+	asm.run(NAME, IN_DIR, OUT_DIR_1)
 
-	IN = f"{IN_DIR}/{NAME}.asm"
-	OUT = f"{OUT_DIR}/{NAME}"
-
-	OUT_REF = f"{OUT}.ref.txt"
-	OUT_SIM = f"{OUT}.sim.txt"
-
-	makedirs(OUT_DIR, exist_ok=True)
-
-	asm = Asm()
-	print()
-	print(f"Ensamblando {IN}...")
-	start = perf_counter()
-	result = asm.assemble(IN)
-	end = perf_counter()
-	print(f"Listo en {(end - start) * 1000:.2f}ms")
-	print()
-
-	with open(OUT, "w") as file:
-		file.write(result.machineCode)
-
-	print(f"Código escrito a {OUT}")
-
-	with open(OUT_REF, "w") as file:
-		file.write(str(result.referenceTable))
-
-	print(f"Tabla de referencias escrita a {OUT_REF}")
-
-	with open(OUT_SIM, "w") as file:
-		file.write(str(result.symbolTable))
-
-	print(f"Tabla de símbolos escrita a {OUT_SIM}")
+	asm = TwoPassAssembler()
+	asm.run(NAME, IN_DIR, OUT_DIR_2)
 
 if __name__ == "__main__":
 	main()

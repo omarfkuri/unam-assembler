@@ -1,11 +1,5 @@
-from asm.parser import *
-
-class ReferenceTable:
-	def __init__(self):
-		pass
-
-	def __str__(self):
-		return "Tabla de referencias"
+from asm.two_pass.parser import *
+from asm.common import *
 
 class CodeGeneratorResult:
 	def __init__(self, referenceTable: ReferenceTable, code: str):
