@@ -1,34 +1,29 @@
-
 class ReferenceTable:
-	def __init__(self):
-		self.references = {}  # {etiqueta: [{'posicion': int, 'tipo': str, 'tamaño': int}, ...]}
+    def __init__(self):
+        # Diccionario que mapea: Nombre del Símbolo -> Lista de direcciones donde se usa
+        self.references: dict[str, list[int]] = {}
 
-	def add_reference(self, etiqueta: str, posicion: int, tipo: str, tamaño: int):
-		"""Agrega una referencia pendiente"""
-		if etiqueta not in self.references:
-			self.references[etiqueta] = []
-		self.references[etiqueta].append({
-			'posicion': posicion,
-			'tipo': tipo,
-			'tamaño': tamaño
-		})
+    def add_usage(self, name: str, address: int):
+        """Registra que el símbolo 'name' fue usado en la dirección 'address'."""
+        if name not in self.references:
+            self.references[name] = []
+        self.references[name].append(address)
 
-	def __str__(self):
-		if not self.references:
-			return "Tabla de referencias:\n--\nSin referencias pendientes"
-		
-		lines = ["Tabla de referencias:"]
-		lines.append("-" * 60)
-		lines.append(f"{'Etiqueta':<20} {'Posición':>12} {'Tipo':>12} {'Tamaño':>8}")
-		lines.append("-" * 60)
-		
-		total_refs = 0
-		for etiqueta, refs in sorted(self.references.items()):
-			for ref in refs:
-				lines.append(f"{etiqueta:<20} 0x{ref['posicion']:08X} {ref['tipo']:>12} {ref['tamaño']:>8}")
-				total_refs += 1
-		
-		lines.append("-" * 60)
-		lines.append(f"Total: {total_refs} referencias")
-		
-		return "\n".join(lines)
+    def __str__(self):
+        if not self.references:
+            return "Tabla de referencias: (Vacía)"
+
+        lines = ["Tabla de referencias:"]
+        lines.append("-" * 80)
+        lines.append(f"{'Símbolo':<20} {'Direcciones de uso (Hex)'}")
+        lines.append("-" * 80)
+
+        for name, addresses in sorted(self.references.items()):
+            # Formateamos las direcciones como una lista separada por comas: 0x00001000, 0x00001005...
+            addr_str = ", ".join([f"0x{addr:08X}" for addr in addresses])
+            lines.append(f"{name:<20} {addr_str}")
+
+        lines.append("-" * 80)
+        lines.append(f"Total: {len(self.references)} símbolos referenciados")
+        
+        return "\n".join(lines)
