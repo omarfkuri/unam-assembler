@@ -1,4 +1,4 @@
-from .one_pass import OnePassAssembler, EnsambladorIA32
+from .one_pass import OnePassAssembler
 from .InstructionProcessor import InstructionProcessor
 
-__all__ = ['OnePassAssembler', 'EnsambladorIA32', 'InstructionProcessor']
+__all__ = ['OnePassAssembler', 'InstructionProcessor']
