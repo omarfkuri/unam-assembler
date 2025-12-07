@@ -1,5 +1,11 @@
 # Ensamblador en Python
 
+## Integrantes
+
+Garcia Nava Diego 
+Ramírez Rodríguez Oscar Gael 
+Freaner Kuri Omar Ariel
+
 ## Correr el programa
 ```bash
 ./scripts/run.sh
