@@ -1,7 +1,6 @@
 from os import makedirs
 
 from asm import *
-# CORRECCIÓN: Importamos explícitamente la clase para que Python la encuentre
 from asm.two_pass.two_pass import TwoPassAssembler 
 
 NAME = "test3"

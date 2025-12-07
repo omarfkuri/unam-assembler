@@ -80,7 +80,7 @@ class OnePassAssembler(AssemblerI):
         opcode = []
         
         match instruction:
-            # --- MOVIMIENTOS ---
+            # movimientos
             case MoveInstruction():
                 if isinstance(instruction.dest, MemoryExpression):
                     opcode = [0x89] 
@@ -111,7 +111,7 @@ class OnePassAssembler(AssemblerI):
             case XchgInstruction():
                 opcode = [0x87, self._encode_reg_reg_byte(instruction.op1, instruction.op2)]
 
-            # --- PILA ---
+            # pila 
             case PushInstruction():
                 # 50+rd (PUSH r32)
                 reg_id = self._get_reg_id(instruction.op)
@@ -122,7 +122,7 @@ class OnePassAssembler(AssemblerI):
                 reg_id = self._get_reg_id(instruction.op)
                 opcode = [0x58 + reg_id]
 
-            # --- ARITMÉTICA ---
+            # aritmética
             case AddInstruction():
                 opcode = [0x01, self._encode_reg_reg_byte(instruction.dest, instruction.src)]
 
@@ -147,7 +147,7 @@ class OnePassAssembler(AssemblerI):
                 reg_id = self._get_reg_id(instruction.op)
                 opcode = [0x40 + reg_id] # 40+rd
             
-            # --- LÓGICA ---
+            # lógica 
             case AndInstruction():
                 opcode = [0x21, self._encode_reg_reg_byte(instruction.dest, instruction.src)]
             
@@ -160,7 +160,7 @@ class OnePassAssembler(AssemblerI):
             case TestInstruction():
                 opcode = [0x85, self._encode_reg_reg_byte(instruction.op1, instruction.op2)]
 
-            # --- COMPARACIÓN ---
+            # cmp 
             case CmpInstruction():
                 if isinstance(instruction.op2, IntegerExpression):
                     reg_id = self._get_reg_id(instruction.op1)
@@ -174,7 +174,7 @@ class OnePassAssembler(AssemblerI):
                 else:
                     opcode = [0x39, self._encode_reg_reg_byte(instruction.op1, instruction.op2)]
 
-            # --- SALTOS Y CONTROL ---
+            # saltos y control
             case LoopInstruction(): opcode = [0xE2, self._encode_rel_jump(instruction.label)]
             case JmpInstruction(): opcode = [0xEB, self._encode_rel_jump(instruction.label)]
             
@@ -191,7 +191,6 @@ class OnePassAssembler(AssemblerI):
             case JbeInstruction():                    opcode = [0x76, self._encode_rel_jump(instruction.label)]
 
             case CallInstruction():
-                # [cite_start]CALL rel32 (E8) [cite: 179]
                 opcode = [0xE8]
                 offset_bytes = self._encode_call_offset(instruction.label)
                 opcode.extend(offset_bytes)
@@ -211,7 +210,7 @@ class OnePassAssembler(AssemblerI):
 
         self._emit(opcode)
 
-    # --- Métodos de Soporte ---
+    # metodos auxiliares
 
     def _define_label(self, label: str):
         if self.symbol_table.has_symbol(label): return
