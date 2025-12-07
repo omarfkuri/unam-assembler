@@ -2,9 +2,9 @@
 
 ## Integrantes
 
-# Garcia Nava Diego 
-# Ramírez Rodríguez Oscar Gael 
-# Freaner Kuri Omar Ariel
+### Garcia Nava Diego 
+### Ramírez Rodríguez Oscar Gael 
+### Freaner Kuri Omar Ariel
 
 ## Correr el programa
 ```bash
