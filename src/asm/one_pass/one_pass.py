@@ -1,12 +1,5 @@
-from typing import cast
 from asm.common import *
-
-try:
-    from asm.two_pass.parser.Instruction import *
-except ImportError:
-    from asm.two_pass.Instruction import *
-
-from asm.two_pass.parser import Parser
+from asm.common.inst import *
 
 REGISTERS = {
     'eax': 0, 'ecx': 1, 'edx': 2, 'ebx': 3, 'esp': 4, 'ebp': 5, 'esi': 6, 'edi': 7,
@@ -14,11 +7,10 @@ REGISTERS = {
     'al': 0,  'cl': 1,  'dl': 2,  'bl': 3,  'ah': 4,  'ch': 5,  'dh': 6,  'bh': 7
 }
 
-class OnePassAssembler(AssemblerI):
+class OnePassAssembler(AssemblerI, InstructionParser):
 
     def __init__(self):
         super().__init__("1 pasada")
-        self.parser_helper = Parser()
         self.symbol_table = SymbolTable()
         self.ref_table = ReferenceTable()
         self.current_address = 0x1000
@@ -71,7 +63,7 @@ class OnePassAssembler(AssemblerI):
             return
 
         try:
-            inst = self.parser_helper._parseInstruction(code)
+            inst = self.parseInstruction(code)
             self._generate_inst_code(inst)
         except Exception as e:
             pass

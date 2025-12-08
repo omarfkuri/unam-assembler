@@ -1,9 +1,5 @@
 import sys
-try:
-    from asm.two_pass.parser.Instruction import *
-except ImportError:
-    from asm.two_pass.Instruction import *
-from asm.two_pass.parser import Parser
+from asm.two_pass.parser import *
 from asm.common import *
 
 REGISTERS = {
